@@ -1,9 +1,8 @@
 {
-    "module": "commonjs",
-    "sourceMaps": true,
-    "projFile": "./test.fsx",
-    "outDir": "out",
-    "scripts": {
-        "prebuild": "npm install"
-    }
+  "module": "amd",
+  "sourceMaps": true,
+  "projFile": "web/web.fsproj",
+  "outDir": "out",
+  "scripts": {
+  }
 }
