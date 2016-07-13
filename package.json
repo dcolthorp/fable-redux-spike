@@ -9,6 +9,10 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "broccoli": "^0.16.9"
+    "broccoli": "^0.16.9",
+    "broccoli-babel-transpiler": "^5.5.0",
+    "broccoli-concat": "^2.2.1",
+    "broccoli-merge-trees": "^1.1.2",
+    "broccoli-static-compiler": "^0.2.2"
   }
 }

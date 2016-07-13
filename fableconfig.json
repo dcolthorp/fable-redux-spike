@@ -1,5 +1,6 @@
 {
-  "module": "amd",
+  "module": "es2015",
+  "ecma": "es2015",
   "sourceMaps": true,
   "projFile": "web/web.fsproj",
   "outDir": "out",

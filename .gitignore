@@ -4,3 +4,4 @@ packages
 .fake
 .paket
 .DS_Store
+tmp

@@ -10,4 +10,4 @@ module Main =
   let t =
     Node (1, Leaf, Leaf)
 
-  printfn "%A" t
+  printfn "Hello will, this is a value %A" 41
