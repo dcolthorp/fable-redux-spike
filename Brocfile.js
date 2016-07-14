@@ -11,11 +11,16 @@ var appHtml = funnel('web', {
   destDir : '/'
 });
 
+var maps = funnel('out', {
+  include: ["**/*.map"],
+  destDir : 'js'
+});
+
 var transpiled = esTranspiler('out', {
   stage: 0,
   moduleIds: true,
   modules: 'amd',
-  sourceMaps: false,
+  sourceMaps: true,
   only: '**/*.js',
 });
 
@@ -23,11 +28,11 @@ var fableScripts = funnel(transpiled, {
   include   : ['**/*.js'],
   destDir: 'out',
 });
+
 var main = concat(fableScripts, {
   inputFiles: "**/*.js",
   outputFile: '/js/web.js'
 });
-
 
 var vendorJs = funnel('node_modules', {
   srcDir  : '/',
@@ -38,4 +43,4 @@ var vendorJs = funnel('node_modules', {
   destDir: '/js'
 });
 
-module.exports = mergeTrees([appHtml, main, vendorJs]);
+module.exports = mergeTrees([appHtml, main, vendorJs, maps]);

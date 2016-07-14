@@ -13,6 +13,13 @@
     "broccoli-babel-transpiler": "^5.5.0",
     "broccoli-concat": "^2.2.1",
     "broccoli-merge-trees": "^1.1.2",
-    "broccoli-static-compiler": "^0.2.2"
+    "broccoli-source-map": "^0.2.4",
+    "broccoli-static-compiler": "^0.2.2",
+    "fable-compiler": "^0.4.0-alpha",
+    "fable-core": "^0.2.0-alpha"
+  },
+  "dependencies": {
+    "fable-compiler": "^0.4.0-alpha",
+    "fable-import-virtualdom": "0.0.8"
   }
 }

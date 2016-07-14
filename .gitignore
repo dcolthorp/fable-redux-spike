@@ -5,3 +5,4 @@ packages
 .paket
 .DS_Store
 tmp
+.*.swp

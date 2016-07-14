@@ -1,2 +1,3 @@
-
-printfn "Hello, world!"
+open System
+open System.Diagnostics
+Debug.WriteLine "Hello, world!"

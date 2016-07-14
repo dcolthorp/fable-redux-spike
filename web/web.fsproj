@@ -33,9 +33,14 @@
   <!--   <DocumentationFile>bin\Release\web.XML</DocumentationFile> -->
   <!-- </PropertyGroup> -->
   <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Diagnostics" />
     <Reference Include="Fable.Core">
       <HintPath>../node_modules/fable-core/Fable.Core.dll</HintPath>
     </Reference>
+  </ItemGroup>
+ <ItemGroup>
+    <Compile Include="../node_modules/fable-import-virtualdom/Fable.Helpers.Virtualdom.fs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Model.fs" />
