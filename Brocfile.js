@@ -1,3 +1,5 @@
+"use strict"
+
 var concat = require('broccoli-concat'),
     mergeTrees  = require('broccoli-merge-trees'),
     funnel   = require('broccoli-funnel'),
@@ -34,7 +36,7 @@ var main = concat(fableScripts, {
   outputFile: '/js/web.js'
 });
 
-var vendorJs = funnel('node_modules', {
+var nodeVendorJs = funnel('node_modules', {
   srcDir  : '/',
   include   : ['core-js/client/*',
              'requirejs/*',
@@ -43,4 +45,13 @@ var vendorJs = funnel('node_modules', {
   destDir: '/js'
 });
 
-module.exports = mergeTrees([appHtml, main, vendorJs, maps]);
+
+let bower = funnel('bower_components', {
+  srcDir: '/',
+  include: [
+    'virtual-dom/dist/virtual-dom.js'
+  ],
+  destDir: '/js'
+
+});
+module.exports = mergeTrees([appHtml, main, nodeVendorJs, bower, maps]);

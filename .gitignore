@@ -6,3 +6,4 @@ packages
 .DS_Store
 tmp
 .*.swp
+bower_components

@@ -12,10 +12,21 @@ open Fable.Helpers.Virtualdom.App
 open Fable.Helpers.Virtualdom.Html
 
 module Main =
-  open Tree
 
-  Debug.WriteLine "Yo"
-  let t =
-    Node (1, Leaf, Leaf)
+  type Model = Yo
+  type Action = Do
 
-  printfn "Hello will, this is a value %A" Leaf
+  let initModel = Yo
+  let todoView a = div [] [text "hello!"]
+
+
+  let todoUpdate model msg =
+    Yo, []
+
+  let act () = async {
+    do! Async.Sleep 1
+    printfn "Yo!"
+    }
+
+  let app : App<Model, Action> = createApp {Model = initModel; View = todoView; Update = todoUpdate}
+  let processor = app |> start renderer
