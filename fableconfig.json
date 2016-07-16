@@ -1,9 +1,21 @@
 {
-  "module": "es2015",
-  "ecma": "es2015",
+  "module": "commonjs",
   "sourceMaps": true,
-  "projFile": "web/web.fsproj",
+  "projFile": "src/web.fsproj",
+  "babelPlugins": ["transform-runtime"],
   "outDir": "out",
   "scripts": {
+    "postbuild": "node node_modules/webpack/bin/webpack"
+  },
+  "targets": {
+    "debug": {
+      "watch": true
+    },
+    "production": {
+      "sourceMaps": false,
+      "scripts": {
+        "postbuild": "node node_modules/webpack/bin/webpack -p"
+      }
+    }
   }
 }

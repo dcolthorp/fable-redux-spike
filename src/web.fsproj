@@ -33,18 +33,23 @@
   <!--   <DocumentationFile>bin\Release\web.XML</DocumentationFile> -->
   <!-- </PropertyGroup> -->
   <ItemGroup>
+    <Reference Include="mscorlib" />
     <Reference Include="System" />
+    <Reference Include="System.Core" />
     <Reference Include="System.Diagnostics" />
+    <Reference Include="System.Numerics" />
     <Reference Include="Fable.Core">
       <HintPath>../node_modules/fable-core/Fable.Core.dll</HintPath>
     </Reference>
-  </ItemGroup>
- <ItemGroup>
-    <Compile Include="../node_modules/fable-import-virtualdom/Fable.Helpers.Virtualdom.fs" />
+    <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+      <Private>True</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Model.fs" />
-    <Compile Include="web.fs" />
+    <Compile Include="../node_modules/fable-import-react/Fable.Import.React.fs" />
+    <Compile Include="../node_modules/fable-import-react/Fable.Helpers.React.fs" />
+    <Compile Include="client/Model.fs" />
+    <Compile Include="client/client.fs" />
   </ItemGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
