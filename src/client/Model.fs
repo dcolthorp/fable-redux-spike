@@ -1,4 +1,4 @@
-namespace Web
+namespace Model
 
 open System
 
@@ -78,7 +78,9 @@ module Actions =
         | a -> a
     List.map update list
 
-  let rec perform state = function
+  let rec perform state act =
+    printfn "%A" act
+    match act with
     | Create (todo) ->
       { state with List = todo :: state.List}
 

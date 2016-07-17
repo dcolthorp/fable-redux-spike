@@ -16,6 +16,14 @@ var cfg = {
         loader: "source-map-loader"
       }
     ]
+  },
+
+  resolve: {
+  //   root: [
+  //     path.join(__dirname, "..", "gulp", "node_modules"),
+  //     path.join(__dirname, "..", "scripts", "modules"),
+  //   ],
+    extensions: ['', '.js', '.json']
   }
 };
 

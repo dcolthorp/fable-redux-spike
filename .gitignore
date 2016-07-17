@@ -7,3 +7,4 @@ packages
 tmp
 .*.swp
 bower_components
+public/bundle.*

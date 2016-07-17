@@ -48,7 +48,14 @@
   <ItemGroup>
     <Compile Include="../node_modules/fable-import-react/Fable.Import.React.fs" />
     <Compile Include="../node_modules/fable-import-react/Fable.Helpers.React.fs" />
+    <Compile Include="../node_modules/fable-import-react-router/Fable.Import.HistoryModule.fs" />
+    <Compile Include="../node_modules/fable-import-react-router/Fable.Import.ReactRouter.fs" />
+    <Compile Include="../node_modules/fable-import-redux/Fable.Import.Redux.fs" />
+    <Compile Include="../node_modules/fable-import-react-redux/Fable.Import.ReactRedux.fs" />
+    <Compile Include="../node_modules/fable-import-react-router-redux/Fable.Import.ReactRouterRedux.fs" />
     <Compile Include="client/Model.fs" />
+    <Compile Include="client/Properties.fs" />
+    <Compile Include="client/Components.fs" />
     <Compile Include="client/client.fs" />
   </ItemGroup>
   <PropertyGroup>
