@@ -64,6 +64,7 @@ module Perm =
 // authorization have a permission type as their first constituent. This forces
 // us to check for permission at the time when we construct them.
 type TodoAction =
+  | Nothing
   | Create of Todo.T
   | ChangeText of Perm.ToEdit * string
   | MarkComplete of Perm.ToComplete
@@ -79,9 +80,9 @@ module Actions =
     List.map update list
 
   let rec perform state act =
-    printfn "%A" act
     match act with
     | Create (todo) ->
+      printfn "Creating todo"
       { state with List = todo :: state.List}
 
     | ChangeText (Perm.CanEdit todo, s) ->
@@ -94,32 +95,36 @@ module Actions =
     | CheckAll todos ->
       List.fold perform state (List.map MarkComplete todos)
 
+    | Nothing ->
+      printfn "Nothing happened"
+      state
 
-module Tests =
-  let ``example`` =
-    let user1 = { Id = UID 1 }
-    let user2 = { Id = UID 2 }
 
-    let s1 = { List = [] }
+// module Tests =
+//   let ``example`` () =
+//     let user1 = { Id = UID 1 }
+//     let user2 = { Id = UID 2 }
 
-    let todo1 = Todo.make user1.Id "Buy some milk"
-    let todo2 = Todo.makeProtected user1.Id "For my eyes only"
-    let todo3 = Todo.make user2.Id "Do a little dance"
+//     let s1 = { List = [] }
 
-    let createActions =
-          [
-            Create (todo1)
-            Create (todo2)
-            Create (todo3)
-          ]
-    let check1 =
-      match Perm.requestComplete user1 todo1 with
-        | Some perm -> List.singleton <| MarkComplete perm
-        | None -> []
-    let check2 =
-      match Perm.requestComplete user2 todo2 with
-        | Some perm -> List.singleton <| MarkComplete perm
-        | None -> []
-    let actions = (List.reduce List.append [createActions; check1; check2])
-    printfn "%A" actions
-    List.fold Actions.perform s1 actions
+//     let todo1 = Todo.make user1.Id "Buy some milk"
+//     let todo2 = Todo.makeProtected user1.Id "For my eyes only"
+//     let todo3 = Todo.make user2.Id "Do a little dance"
+
+//     let createActions =
+//           [
+//             Create (todo1)
+//             Create (todo2)
+//             Create (todo3)
+//           ]
+//     let check1 =
+//       match Perm.requestComplete user1 todo1 with
+//         | Some perm -> List.singleton <| MarkComplete perm
+//         | None -> []
+//     let check2 =
+//       match Perm.requestComplete user2 todo2 with
+//         | Some perm -> List.singleton <| MarkComplete perm
+//         | None -> []
+//     let actions = (List.reduce List.append [createActions; check1; check2])
+//     printfn "%A" actions
+//     List.fold Actions.perform s1 actions

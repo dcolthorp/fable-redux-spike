@@ -15,51 +15,120 @@ open Properties
 open Model
 
 
+type Action<'a> = {
+  ``type`` : String;
+  payload : 'a
+  }
+
+
+let nothing () = {``type`` = "app"; payload = Nothing }
+let addTodo () = {``type`` = "app"; payload = Create (Todo.make (UID 1) "Hello!") }
+
+let toString = function
+  | Nothing -> "Nothing"
+  | Create _ -> "Create"
+
+let toObj { ``type`` = actionType; payload = p } =
+  [ ("type", actionType :> obj); ("payload", p :> obj) ]
+  |> List.toSeq
+  |> Fable.Core.Operators.createObj
+
+
+let reducer = Func<TodosState, Action<TodoAction>, TodosState>(fun state act ->
+  match act.``type`` with
+  | "app" ->
+    Actions.perform state (act.payload)
+  | _ -> state)
+
+
+let store = Fable.Import.Redux.Globals.createStore(reducer, {List = []})
+
 type TodoList(props, ?state) =
   inherit Tag.Component<TodosProps, TodosState>(props, ?state = state)
 
+  let labelFrom actionCreator =  actionCreator().``payload`` |> toString
+
+  let dispatcherFrom actionCreator (_:React.MouseEvent) =
+    let actionDispatcher action =
+      match (props :> ReactRedux.Property<TodosProps>).store with
+        | None -> failwith "Cannot create action dispatcher without a Redux store"
+        | Some store -> action
+        |> toObj
+        |> store.dispatch
+        |> (fun a -> printfn "%A" ( store.getState()))
+        |> ignore
+    actionCreator () |> actionDispatcher
+
+  let createActionButton (actionLabel, dispatcher) =
+    Tag.button [ Attr.Key actionLabel
+                 Attr.OnClick dispatcher
+               ]
+      [ Tag.h1 [] [unbox actionLabel]]
+
+  let buttons =
+    [ nothing; addTodo ]
+    |> List.map (fun actionCreator -> (labelFrom actionCreator, dispatcherFrom actionCreator))
+    |> List.map createActionButton
+
+  // let appState = match state with
+  //   | Some s -> s
+  //   | None -> failwith "huh?"
+
   member self.render() =
+    // let appState : TodosState =
+    //   match (props :> ReactRedux.Property<TodosProps>).store with
+    //     | Some store -> store.getState() |> unbox
+    //     | None -> failwith "Cannot get state without a Redux store"
+
+    // printfn "Rendering with appstate %A" appState
     Tag.div [] [
-      Tag.h1 [] [unbox "Hello"]
+      Tag.h1 [] [unbox (sprintf "%A" props)];
+      Tag.div [] buttons
     ]
 
 
+TodoList?props <- createObj [
+  "State" ==> React.PropTypes.object
+]
 
-let stateMapper<'a> = Func<'a, obj>(fun a -> Tag.toPlainJsObj a)
+let stateMapper =
+  Func<TodosState, obj>(fun a ->
+                printfn "statemapper\n%A" a
+                {List = a.List} |> Tag.toPlainJsObj)
 
+let mapDispatchToProps<'a> =
+  Func<'a, obj>(fun a ->
+                printfn "mapDispatchToProps<'a>"
+                createObj [])
 
 [<Emit("$0")>]
 let coerce<'a> f : 'a = failwith "js"
-
-let counter props = Tag.com<TodoList,TodosProps,TodosState> props []
-
-// [<Emit("React.createElement($0,$1)")>]
-//  let instantiate<'props> (a:React.ReactElement<obj>) (p:'props) =
-//    failwith "js only"
 
 [<Emit("debugger")>]
   let debugger() =
    failwith "js only"
 
-// [<Emit("$0")>]
-//   let tocom<'a> a : U2<React.ComponentClass<'a>,React.StatelessComponent<'a>> = failwith "js only"
-[<Emit("$0")>]
-  let tocom<'a> a : 'a -> React.ReactElement<obj> list -> React.ReactElement<obj> = failwith "js only"
+type [<Import("*","react-redux")>] ReRe =
+        static member connect(?mapStateToProps: Func<'a,'b>, ?mapDispatchToProps: Func<'c,'d>): obj = failwith "JS only"
 
-[<Emit("$0")>]
-  let wipe a : React.ReactElement<obj> = failwith "js only"
+[<Emit("window.con = (con); con($0, $1)")>]
+  let connect mapState mapDispatchToProps: React.ReactElement<obj> = failwith "js"
 
-let counterContainer (props: TodosProps) =
-  let inner = counter props
-  let connect = ReactRedux.Globals.connect(coerce<ReactRedux.MapStateToProps> stateMapper).Invoke(inner)
 
-  let comp = tocom<obj> connect
-  // React.createElement(comp, (Tag.toPlainJsObj props), [| |])
-  // inner
-  comp
+let comp = ReRe.connect(stateMapper, mapDispatchToProps)
+
+let globals = React
+[<Emit("globals.createElement($0(TodoList), $2, [])")>]
+  let createConnected comp compType props: React.ReactElement<obj> = failwith "js"
+
 
 type Provider = ReactRedux.Provider<TodosState, TodosProps>
 let provider (props : TodosProps) =
-  let el = counterContainer props
-  debugger()
-  Tag.com<Provider,ReactRedux.Property<TodosProps>,TodosState> props [el props []]
+  printfn "Hello?"
+  let el = createConnected comp TodoList (Tag.toPlainJsObj props)
+  // debugger()
+  Tag.com<Provider,ReactRedux.Property<TodosProps>,TodosState> props [
+    el
+  //   // Tag.com<TodoList, TodosProps, TodosState> props []
+  //   connect TodoList (Tag.toPlainJsObj props) stateMapper
+    ]
