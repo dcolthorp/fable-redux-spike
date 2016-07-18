@@ -118,7 +118,7 @@ type [<Import("*","react-redux")>] ReRe =
 let comp = ReRe.connect(stateMapper, mapDispatchToProps)
 
 let globals = React
-[<Emit("globals.createElement($0(TodoList), $2, [])")>]
+[<Emit("globals.createElement($0($1), $2, [])")>]
   let createConnected comp compType props: React.ReactElement<obj> = failwith "js"
 
 
