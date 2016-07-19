@@ -105,30 +105,48 @@ let mapDispatchToProps<'a> =
 let coerce<'a> f : 'a = failwith "js"
 
 [<Emit("debugger")>]
-  let debugger() =
-   failwith "js only"
+let debugger() =
+  failwith "js only"
+
 
 type [<Import("*","react-redux")>] ReRe =
-        static member connect(?mapStateToProps: Func<'a,'b>, ?mapDispatchToProps: Func<'c,'d>): obj = failwith "JS only"
-
-[<Emit("window.con = (con); con($0, $1)")>]
-  let connect mapState mapDispatchToProps: React.ReactElement<obj> = failwith "js"
-
-
-let comp = ReRe.connect(stateMapper, mapDispatchToProps)
+  static member connect(?mapStateToProps: Func<'a,'b>, ?mapDispatchToProps: Func<'c,'d>): obj = failwith "JS only"
 
 let globals = React
 [<Emit("globals.createElement($0($1), $2, [])")>]
-  let createConnected comp compType props: React.ReactElement<obj> = failwith "js"
+let createConnected comp compType props: React.ReactElement<obj> = failwith "js"
 
+
+
+//////////////////////////////////////////////////////
+// Broken trying to minimize changes
+module ReRedux =
+  type ClassDecorator =
+    [<Emit("$0($1...)")>] abstract Invoke: ``component``: 'T -> React.ComponentClass<'a>
+
+  and MapStateToProps =
+    [<Emit("$0($1...)")>] abstract Invoke: state: obj * ?ownProps: obj -> obj
+  and [<Import("*","react-redux")>] Globals =
+      static member connect(?mapStateToProps: MapStateToProps): ClassDecorator = failwith "JS only"
+
+type SMap() =
+
+  interface ReRedux.MapStateToProps with
+    member this.Invoke(state, ownProps) = {List = (unbox state).List} |> Tag.toPlainJsObj
+
+let mapState = new SMap()
+
+let t = TodoList
+let com : React.ComponentClass<obj> = ReRedux.Globals.connect(mapState).Invoke(t)
+//////////////////////////////////////////////////
 
 type Provider = ReactRedux.Provider<TodosState, TodosProps>
 let provider (props : TodosProps) =
-  printfn "Hello?"
+  let comp = ReRe.connect(stateMapper, mapDispatchToProps)
   let el = createConnected comp TodoList (Tag.toPlainJsObj props)
-  // debugger()
   Tag.com<Provider,ReactRedux.Property<TodosProps>,TodosState> props [
     el
-  //   // Tag.com<TodoList, TodosProps, TodosState> props []
-  //   connect TodoList (Tag.toPlainJsObj props) stateMapper
+
+    // Broken:
+    // React.createElement(Case1 com, props |> Tag.toPlainJsObj)
     ]
