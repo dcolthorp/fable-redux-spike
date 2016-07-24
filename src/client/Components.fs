@@ -43,8 +43,10 @@ let reducer = Func<TodosState, Action<TodoAction>, TodosState>(fun state act ->
 
 let store = Fable.Import.Redux.Globals.createStore(reducer, {List = []})
 
-type TodoList(props, ?state) =
-  inherit Tag.Component<TodosProps, TodosState>(props, ?state = state)
+type TodoList(props) as this =
+  inherit React.Component<TodosProps, TodosState>(props)
+
+  do this.state <- {List = []}
 
   let labelFrom actionCreator =  actionCreator().``payload`` |> toString
 
@@ -94,7 +96,7 @@ TodoList?props <- createObj [
 let stateMapper =
   Func<TodosState, obj>(fun a ->
                 printfn "statemapper\n%A" a
-                {List = a.List} |> Tag.toPlainJsObj)
+                {List = a.List} |> Serialize.toPlainJsObj)
 
 let mapDispatchToProps<'a> =
   Func<'a, obj>(fun a ->
@@ -132,7 +134,7 @@ module ReRedux =
 type SMap() =
 
   interface ReRedux.MapStateToProps with
-    member this.Invoke(state, ownProps) = {List = (unbox state).List} |> Tag.toPlainJsObj
+    member this.Invoke(state, ownProps) = {List = (unbox state).List} |> Serialize.toPlainJsObj
 
 let mapState = new SMap()
 
@@ -143,10 +145,10 @@ let com : React.ComponentClass<obj> = ReRedux.Globals.connect(mapState).Invoke(t
 type Provider = ReactRedux.Provider<TodosState, TodosProps>
 let provider (props : TodosProps) =
   let comp = ReRe.connect(stateMapper, mapDispatchToProps)
-  let el = createConnected comp TodoList (Tag.toPlainJsObj props)
+  let el = createConnected comp TodoList (Serialize.toPlainJsObj props)
   Tag.com<Provider,ReactRedux.Property<TodosProps>,TodosState> props [
     el
 
     // Broken:
-    // React.createElement(Case1 com, props |> Tag.toPlainJsObj)
+    // React.createElement(Case1 com, props |> Serialize.toPlainJsObj)
     ]
