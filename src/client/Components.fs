@@ -35,6 +35,7 @@ let toObj { ``type`` = actionType; payload = p } =
 
 
 let reducer = Func<TodosState, Action<TodoAction>, TodosState>(fun state act ->
+  printfn "reducer %A %A" state act
   match act.``type`` with
   | "app" ->
     Actions.perform state (act.payload)
@@ -57,7 +58,7 @@ type TodoList(props) as this =
         | Some store -> action
         |> toObj
         |> store.dispatch
-        |> (fun a -> printfn "%A" ( store.getState()))
+        |> (fun a -> printfn "dispatcing, current store state is %A" ( store.getState()))
         |> ignore
     actionCreator () |> actionDispatcher
 
@@ -111,44 +112,26 @@ let debugger() =
   failwith "js only"
 
 
-type [<Import("*","react-redux")>] ReRe =
-  static member connect(?mapStateToProps: Func<'a,'b>, ?mapDispatchToProps: Func<'c,'d>): obj = failwith "JS only"
-
-let globals = React
-[<Emit("globals.createElement($0($1), $2, [])")>]
-let createConnected comp compType props: React.ReactElement<obj> = failwith "js"
-
-
 
 //////////////////////////////////////////////////////
 // Broken trying to minimize changes
-module ReRedux =
-  type ClassDecorator =
-    [<Emit("$0($1...)")>] abstract Invoke: ``component``: 'T -> React.ComponentClass<'a>
 
-  and MapStateToProps =
-    [<Emit("$0($1...)")>] abstract Invoke: state: obj * ?ownProps: obj -> obj
-  and [<Import("*","react-redux")>] Globals =
-      static member connect(?mapStateToProps: MapStateToProps): ClassDecorator = failwith "JS only"
+let stateMapper' : ReactRedux.MapStateToProps =
+  Func<obj, obj option, obj>(
+    fun a b ->
+      let a' = unbox a : TodosState
+      createObj [
+        "state" ==> a
+      ])
 
-type SMap() =
+let com : React.ComponentClass<obj> =
+    ReactRedux.Globals.connect(stateMapper').Invoke(TodoList)
 
-  interface ReRedux.MapStateToProps with
-    member this.Invoke(state, ownProps) = {List = (unbox state).List} |> Serialize.toPlainJsObj
-
-let mapState = new SMap()
-
-let t = TodoList
-let com : React.ComponentClass<obj> = ReRedux.Globals.connect(mapState).Invoke(t)
 //////////////////////////////////////////////////
 
 type Provider = ReactRedux.Provider<TodosState, TodosProps>
-let provider (props : TodosProps) =
-  let comp = ReRe.connect(stateMapper, mapDispatchToProps)
-  let el = createConnected comp TodoList (Serialize.toPlainJsObj props)
-  Tag.com<Provider,ReactRedux.Property<TodosProps>,TodosState> props [
-    el
 
-    // Broken:
-    // React.createElement(Case1 com, props |> Serialize.toPlainJsObj)
+let provider (props : TodosProps) =
+  Tag.com<Provider,ReactRedux.Property<TodosProps>,TodosState> props [
+    React.createElement(Case1 com, props |> Serialize.toPlainJsObj)
     ]
