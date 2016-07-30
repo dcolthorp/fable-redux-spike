@@ -16,7 +16,7 @@ module R = Fable.Helpers.React
 open R.Props
 
 open Model
-open Components
+open App
 
 
 let reducer = Redux.reducer Actions.perform
@@ -30,6 +30,6 @@ printfn "Store state is %A" <| (store.getState() : TodosState)
 let initialProps = TodosProps(Some store, None)
 
 ReactDom.render(
-    Components.provider initialProps,
+    App.provider initialProps,
     Browser.document.getElementById "content")
 |> ignore

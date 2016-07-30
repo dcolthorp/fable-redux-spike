@@ -1,4 +1,4 @@
-module Components
+module App
 
 open System
 open Fable.Core
@@ -6,13 +6,14 @@ open Fable.Import
 
 module React = Fable.Import.React
 module Redux = Fable.Helpers.Redux
-module ReactRedux = Fable.Helpers.ReactRedux
+// module ReactRedux = Fable.Helpers.ReactRedux
 module Tag = Fable.Helpers.React
 module Attr = Tag.Props
 module ReactRedux = Fable.Import.ReactRedux
 
-open Model
+open Fable.Helpers
 
+open Model
 
 let nothing () = Nothing
 let addTodo (user : User.T) () = Create (Todo.make user.Id "Hello!")
@@ -94,12 +95,4 @@ let stateMapper' =
       res)
 
 
-let com : React.ComponentClass<obj> =
-    ReactRedux.Globals.connect(stateMapper').Invoke(TodoList)
-
-type Provider = ReactRedux.Provider<TodosState, TodosProps>
-
-let provider (props : TodosProps) =
-  Tag.com<Provider,ReactRedux.Property<TodosProps>,TodosState> props [
-    React.createElement(Case1 com, props |> Serialize.toPlainJsObj)
-    ]
+let provider = ReactRedux.buildProvider TodoList stateMapper'
