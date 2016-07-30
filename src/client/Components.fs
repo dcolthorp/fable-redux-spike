@@ -5,7 +5,8 @@ open Fable.Core
 open Fable.Import
 
 module React = Fable.Import.React
-module ReactRedux = Fable.Import.ReactRedux
+module Redux = Fable.Helpers.Redux
+module ReactRedux = Fable.Helpers.ReactRedux
 module Tag = Fable.Helpers.React
 module Attr = Tag.Props
 module ReactRedux = Fable.Import.ReactRedux
@@ -13,26 +14,16 @@ module ReactRedux = Fable.Import.ReactRedux
 open Model
 
 
-type Action<'a> = {
-  ``type`` : String;
-  payload : 'a
-  }
-
-
-let nothing () = {``type`` = "app"; payload = Nothing }
-let addTodo () = {``type`` = "app"; payload = Create (Todo.make (UID 1) "Hello!") }
+let nothing () = Redux.action Nothing
+let addTodo () = Redux.action <| Create (Todo.make (UID 1) "Hello!")
 
 let toString = function
   | Nothing -> "Nothing"
   | Create _ -> "Create"
 
-let toObj { ``type`` = actionType; payload = p } =
-  [ ("type", actionType :> obj); ("payload", p :> obj) ]
-  |> List.toSeq
-  |> Fable.Core.Operators.createObj
 
 
-let reducer = Func<TodosState, Action<TodoAction>, TodosState>(fun state act ->
+let reducer = Func<TodosState, Redux.Action<TodoAction>, TodosState>(fun state act ->
   printfn "reducer %A %A" state act
   match act.``type`` with
   | "app" ->
@@ -65,23 +56,17 @@ type TodoList(props) as this =
 
   do this.state <- {List = []}
 
-  let labelFrom actionCreator =  actionCreator().``payload`` |> toString
+  let labelFrom actionCreator =  actionCreator() |> Redux.payload |> toString
 
   let dispatcherFrom actionCreator (_:React.MouseEvent) =
-    let actionDispatcher action =
-      match (props :> ReactRedux.Property<TodosProps>).store with
-        | None -> failwith "Cannot create action dispatcher without a Redux store"
-        | Some store -> action
-        |> toObj
-        |> store.dispatch
-        |> ignore
-    actionCreator () |> actionDispatcher
+    let act = actionCreator()
+    ReactRedux.dispatch props act
 
 
   let buttons =
     [ nothing; addTodo ]
     |> List.map (fun actionCreator -> (labelFrom actionCreator, dispatcherFrom actionCreator))
-      |> List.map createActionButton
+    |> List.map createActionButton
 
   member self.render() =
     let {List = a} =  props.state in

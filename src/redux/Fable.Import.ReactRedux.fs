@@ -42,3 +42,4 @@ module ReactRedux =
 
   type [<Import("*","react-redux")>] Globals =
     static member connect(?mapStateToProps: MapStateToProps, ?mapDispatchToProps: U2<MapDispatchToPropsFunction, MapDispatchToPropsObject>, ?mergeProps: MergeProps, ?options: Options): ClassDecorator = failwith "JS only"
+
