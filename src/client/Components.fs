@@ -76,7 +76,7 @@ type TodoList(props) as this =
         Tag.ul []
           (List.map (renderTodo props) a)
         Tag.div [] buttons
-        Tag.div [] [unbox <| sprintf "%A" props.user]
+        Tag.div [] [unbox <| sprintf "Logged in as User %O" props.user.Id]
       ]
 
 
