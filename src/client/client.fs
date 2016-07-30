@@ -14,7 +14,6 @@ open R.Props
 
 open Model
 open Components
-open Properties
 
 let initialProps = TodosProps(Some store, None)
 
