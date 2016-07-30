@@ -14,13 +14,19 @@ module Redux =
     payload: 'A;
   }
 
-  let action a =
+  let inline action a =
     {
       ``type`` = APP_KEY;
       payload = a;
     }
 
-  let payload a = a.payload
+  let inline payload a = a.payload
+
+  let reducer f = Func<'S, Action<'A>, 'S>(fun state act ->
+      match act.``type`` with
+      | APP_KEY -> f state (act.payload)
+      | _ -> state)
+
 
   let toObj ({ ``type`` = actionType; payload = p } : Action<'A>) =
     [ ("type", actionType :> obj); ("payload", p :> obj) ]

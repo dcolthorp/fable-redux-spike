@@ -4,10 +4,20 @@ open System
 
 // Simple User ADT
 // Nothing special
-type UserId = UID of int // Good idea? Implications for e.g. Data access?
-type User = {
-  Id : UserId
-}
+type UserId =
+  | UID of int // Good idea? Implications for e.g. Data access?
+  override this.ToString() =
+    match this with
+      | (UID i) -> i.ToString()
+
+
+module User =
+  type T = {
+    Id : UserId
+  }
+
+  let make id = {Id = id}
+  let idValue {Id = UID i} = i
 
 
 // Simple Todo ADT
@@ -40,22 +50,25 @@ module Todo =
 
 
 // App state
-type TodosState = {List : Todo.T list}
+type TodosState = {
+  List : Todo.T list;
+  UserId : UserId;
+}
 
 // Permissions Are TYPES. We want static enforcement of verification. They can
 // be whatever they need to be to represent
 module Perm =
   //
-  type ToEdit = CanEdit of Todo.T
-  type ToComplete = CanComplete of Todo.T
+  type ToEdit = CanEdit_ of Todo.T
+  type ToComplete = CanComplete_ of Todo.T
 
   // Check for permission gets an option
   let requestEdit user todo =
     None
 
-  let requestComplete (user : User) (todo : Todo.T) =
+  let requestComplete (user : User.T) (todo : Todo.T) =
     if user.Id = todo.Owner then
-      Some <| CanComplete todo
+      Some <| CanComplete_ todo
     else
       None
 
@@ -68,6 +81,7 @@ type TodoAction =
   | Create of Todo.T
   | ChangeText of Perm.ToEdit * string
   | MarkComplete of Perm.ToComplete
+  | ToggleComplete of Perm.ToComplete
   | CheckAll of Perm.ToComplete list
 
 
@@ -85,12 +99,15 @@ module Actions =
       printfn "Creating todo"
       { state with List = todo :: state.List}
 
-    | ChangeText (Perm.CanEdit todo, s) ->
+    | ChangeText (Perm.CanEdit_ todo, s) ->
       let updated = { todo with Text = s }
       { state with List = replaceItem todo updated state.List }
 
-    | MarkComplete (Perm.CanComplete todo) ->
+    | MarkComplete (Perm.CanComplete_ todo) ->
       { state with List = replaceItem todo (Todo.setComplete true todo) state.List }
+
+    | ToggleComplete (Perm.CanComplete_ todo) ->
+      { state with List = replaceItem todo (Todo.toggleComplete todo) state.List }
 
     | CheckAll todos ->
       List.fold perform state (List.map MarkComplete todos)
@@ -98,33 +115,3 @@ module Actions =
     | Nothing ->
       printfn "Nothing happened"
       state
-
-
-// module Tests =
-//   let ``example`` () =
-//     let user1 = { Id = UID 1 }
-//     let user2 = { Id = UID 2 }
-
-//     let s1 = { List = [] }
-
-//     let todo1 = Todo.make user1.Id "Buy some milk"
-//     let todo2 = Todo.makeProtected user1.Id "For my eyes only"
-//     let todo3 = Todo.make user2.Id "Do a little dance"
-
-//     let createActions =
-//           [
-//             Create (todo1)
-//             Create (todo2)
-//             Create (todo3)
-//           ]
-//     let check1 =
-//       match Perm.requestComplete user1 todo1 with
-//         | Some perm -> List.singleton <| MarkComplete perm
-//         | None -> []
-//     let check2 =
-//       match Perm.requestComplete user2 todo2 with
-//         | Some perm -> List.singleton <| MarkComplete perm
-//         | None -> []
-//     let actions = (List.reduce List.append [createActions; check1; check2])
-//     printfn "%A" actions
-//     List.fold Actions.perform s1 actions

@@ -56,6 +56,7 @@
     <Compile Include="redux/Fable.Helpers.Redux.fs" />
     <Compile Include="redux/Fable.Helpers.ReactRedux.fs" />
     <Compile Include="client/Model.fs" />
+    <Compile Include="client/TodoItem.fs" />
     <Compile Include="client/Components.fs" />
     <Compile Include="client/client.fs" />
   </ItemGroup>

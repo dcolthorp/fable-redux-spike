@@ -14,21 +14,26 @@ module ReactRedux = Fable.Import.ReactRedux
 open Model
 
 
-let nothing () = Redux.action Nothing
-let addTodo () = Redux.action <| Create (Todo.make (UID 1) "Hello!")
+let nothing () = Nothing
+let addTodo (user : User.T) () = Create (Todo.make user.Id "Hello!")
 
 let toString = function
   | Nothing -> "Nothing"
   | Create _ -> "Create"
 
+type TodosProps(maybeStore : Redux.Store option, maybeChildren : React.ReactElement<TodosProps> option) =
+  let state' =
+    match maybeStore with
+      | None -> failwith "Need an initial state"
+      | Some store ->
+        store.getState() : TodosState
 
+  member val state = state'
+  member val user = User.make state'.UserId
 
-let reducer = Func<TodosState, Redux.Action<TodoAction>, TodosState>(fun state act ->
-  printfn "reducer %A %A" state act
-  match act.``type`` with
-  | "app" ->
-    Actions.perform state (act.payload)
-  | _ -> state)
+  interface ReactRedux.Property<TodosProps> with
+    member val store = maybeStore
+    member val children = maybeChildren
 
 
 let createActionButton (actionLabel, dispatcher) =
@@ -37,26 +42,23 @@ let createActionButton (actionLabel, dispatcher) =
              ]
     [ Tag.h1 [] [unbox actionLabel]]
 
-let renderTodo (todo : Todo.T) =
+let renderTodo (props : TodosProps) (todo : Todo.T) =
+  let check = match Perm.requestComplete props.user todo with
+              | None -> Tag.div [] []
+              | Some perm ->
+                let toggle (_ : React.FormEvent) = ReactRedux.dispatch props (ToggleComplete perm)
+                Tag.input [Attr.Type "checkbox"; Attr.Checked todo.Done; Attr.OnChange toggle] []
+
   Tag.li [] [
-    unbox todo.Text
+    check;
+    unbox <| sprintf "User %O - " todo.Owner
+    unbox todo.Text;
   ]
-
-
-let store = Fable.Import.Redux.Globals.createStore(reducer, {List = []})
-
-type TodosProps(maybeStore : Redux.Store option, maybeChildren : React.ReactElement<TodosProps> option) =
-  member val state = {List = []}
-  interface ReactRedux.Property<TodosProps> with
-    member val store = maybeStore
-    member val children = maybeChildren
 
 type TodoList(props) as this =
   inherit React.Component<TodosProps, TodosState>(props)
 
-  do this.state <- {List = []}
-
-  let labelFrom actionCreator =  actionCreator() |> Redux.payload |> toString
+  let labelFrom actionCreator =  actionCreator() |> toString
 
   let dispatcherFrom actionCreator (_:React.MouseEvent) =
     let act = actionCreator()
@@ -64,35 +66,33 @@ type TodoList(props) as this =
 
 
   let buttons =
-    [ nothing; addTodo ]
+    [ nothing; addTodo props.user ]
     |> List.map (fun actionCreator -> (labelFrom actionCreator, dispatcherFrom actionCreator))
     |> List.map createActionButton
 
   member self.render() =
     let {List = a} =  props.state in
       Tag.div [] [
-        // Tag.h1 [] [Todos];
         Tag.ul []
-          (List.map renderTodo a)
+          (List.map (renderTodo props) a)
         Tag.div [] buttons
+        Tag.div [] [unbox <| sprintf "%A" props.user]
       ]
 
 
 TodoList?props <- createObj [
   "state" ==> React.PropTypes.object
+  "user" ==> React.PropTypes.object
 ]
 
-[<Emit("debugger")>]
-let debugger() =
-  failwith "js only"
-
-let stateMapper' : ReactRedux.MapStateToProps =
-  Func<obj, obj option, obj>(
+let stateMapper' =
+  Func<TodosState, TodosProps option, obj>(
     fun a b ->
-      let a' = unbox a : TodosState
-      createObj [
-        "state" ==> a
-      ])
+      let res = createObj [
+          "state" ==> box a;
+          "user" ==> box b.Value.user]
+      res)
+
 
 let com : React.ComponentClass<obj> =
     ReactRedux.Globals.connect(stateMapper').Invoke(TodoList)

@@ -18,7 +18,7 @@ module ReactRedux =
   // and MapStateToProps =
   //   [<Emit("$0($1...)")>] abstract Invoke: state: obj * ?ownProps: obj -> obj
 
-  and MapStateToProps = Func<obj, obj option, obj>
+  and MapStateToProps<'S, 'P> = Func<'S, 'P option, obj>
 
   and MapDispatchToPropsFunction =
     [<Emit("$0($1...)")>] abstract Invoke: dispatch: Dispatch * ?ownProps: obj -> obj
@@ -41,5 +41,4 @@ module ReactRedux =
 
 
   type [<Import("*","react-redux")>] Globals =
-    static member connect(?mapStateToProps: MapStateToProps, ?mapDispatchToProps: U2<MapDispatchToPropsFunction, MapDispatchToPropsObject>, ?mergeProps: MergeProps, ?options: Options): ClassDecorator = failwith "JS only"
-
+    static member connect(?mapStateToProps: MapStateToProps<'S, 'P>, ?mapDispatchToProps: U2<MapDispatchToPropsFunction, MapDispatchToPropsObject>, ?mergeProps: MergeProps, ?options: Options): ClassDecorator = failwith "JS only"

@@ -18,7 +18,7 @@ module Redux =
 
   and StoreMethods =
     abstract dispatch: Dispatch with get
-    abstract getState: unit -> obj
+    abstract getState: unit -> 'T
 
   and MiddlewareArg =
     abstract dispatch: Dispatch with get
@@ -32,7 +32,7 @@ module Redux =
     member __.getReducer(): Reducer<'T,'U> = failwith "JS only"
     member __.replaceReducer(nextReducer: Reducer<'T,'U>): unit = failwith "JS only"
     member __.dispatch(action: obj): obj = failwith "JS only"
-    member __.getState(): obj = failwith "JS only"
+    member __.getState(): 'T = failwith "JS only"
     member __.subscribe(listener: Function): Function = failwith "JS only"
 
   type [<Import("*","redux")>] Globals =
