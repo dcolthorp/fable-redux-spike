@@ -9,8 +9,7 @@ open Fable.Import.Redux
 open Fable.Import.ReactRedux
 open Fable.Import.Browser
 
-module Redux = Fable.Helpers.Redux
-module ReactRedux = Fable.Helpers.ReactRedux
+open Fable.Helpers
 
 module R = Fable.Helpers.React
 open R.Props
@@ -27,7 +26,7 @@ let store = Fable.Import.Redux.Globals.createStore(reducer, {
 
 printfn "Store state is %A" <| (store.getState() : TodosState)
 
-let initialProps = TodosProps(Some store, None)
+let initialProps = TodoListProps(Some store, None)
 
 ReactDom.render(
     App.provider initialProps,

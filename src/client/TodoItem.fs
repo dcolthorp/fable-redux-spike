@@ -14,30 +14,39 @@ open Model
 
 open Fable.Helpers
 
-// TODO: Create a subcomponent for todo item
+type TodoItemProps(maybeStore, maybeChildren, todo, user) =
+  interface ReactRedux.Property<TodoItemProps>
 
-type TodoItemProps(maybeStore : Redux.Store option, maybeChildren : React.ReactElement<TodoItemProps> option) =
-  abstract todo : Todo.T
-  abstract user : User.T
+  member val todo : Todo.T = todo
+  member val user : User.T = user
+  member val store = maybeStore
+  member val children = maybeChildren
 
-  interface ReactRedux.Property<TodoItemProps> with
-    member val store = maybeStore
-    member val children = maybeChildren
-
-type TodoList(props) as this =
+type TodoList(props) =
   inherit React.Component<TodoItemProps, Todo.T>(props)
 
   let todo = props.todo
 
   member self.render() =
-    let check = match Perm.requestComplete props.user todo with
-      | None -> Tag.div [] []
-      | Some perm ->
-        let toggle (_ : React.FormEvent) = ReactRedux.dispatch props (ToggleComplete perm)
-        Tag.input [Attr.Type "checkbox"; Attr.Checked todo.Done; Attr.OnChange toggle] []
+    let check =
+      match Perm.requestComplete props.user todo with
+        | None -> Tag.div [] []
+        | Some perm ->
+          let toggle (_ : React.FormEvent) = ReactRedux.dispatch props (ToggleComplete perm)
+          Tag.input [Attr.Type "checkbox"; Attr.Checked todo.Done; Attr.OnChange toggle] []
 
     Tag.li [] [
       check;
-      unbox <| sprintf "User %O - " todo.Owner
+      unbox <| sprintf "User id %O - " todo.Owner
       unbox todo.Text;
     ]
+
+let stateMapper =
+  Func<Todo.T, TodoItemProps option, obj>(
+    fun a b ->
+      let res = createObj [
+          "state" ==> box a;
+          "user" ==> box b.Value.user]
+      res)
+
+let make (props : TodoItemProps) = ReactRedux.factory TodoList stateMapper props

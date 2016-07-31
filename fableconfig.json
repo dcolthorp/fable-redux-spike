@@ -5,7 +5,6 @@
   "babelPlugins": ["transform-runtime"],
   "outDir": "out",
   "scripts": {
-    "postbuild": "node node_modules/webpack/bin/webpack"
   },
   "targets": {
     "debug": {

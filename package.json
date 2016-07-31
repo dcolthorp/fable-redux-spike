@@ -21,7 +21,9 @@
     "redux-devtools": "^3.3.1",
     "source-map-loader": "^0.1.5",
     "webpack": "^1.13.1",
-    "webpack-dev-server": "^1.14.1"
+    "webpack-dev-middleware": "^1.6.1",
+    "webpack-dev-server": "^1.14.1",
+    "webpack-hot-middleware": "^2.12.2"
   },
   "dependencies": {
     "babel-core": "^6.11.4",
@@ -31,7 +33,7 @@
     "react": "^15.2.1",
     "react-dom": "^15.2.1",
     "react-redux": "^4.4.5",
-    "react-router": "^2.6.0",
+    "react-router": "^2.6.1",
     "redux": "^3.5.2"
   }
 }
