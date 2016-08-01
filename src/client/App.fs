@@ -13,12 +13,14 @@ open Fable.Helpers
 
 open Model
 
-let nothing () = Nothing
 let addTodo (user : User.T) () = Create (Todo.make user.Id "Hello!")
-
-let toString = function
-  | Nothing -> "Nothing"
-  | Create _ -> "Create"
+let toggleUser (user : User.T) () =
+  let newId =
+    match User.idValue user with
+      | 1 -> UID 2
+      | 2 -> UID 1
+      | x -> failwithf "Unknown id %A" x
+  ChangeUser newId
 
 type TodoListProps(maybeStore : Redux.Store option, maybeChildren : React.ReactElement<TodoListProps> option) =
   let state' =
@@ -27,65 +29,62 @@ type TodoListProps(maybeStore : Redux.Store option, maybeChildren : React.ReactE
       | Some store ->
         store.getState() : TodosState
 
-  interface ReactRedux.Property<TodoListProps>
 
   member val state = state'
   member val user = User.make state'.UserId
 
-  member val store = maybeStore
-  member val children = maybeChildren
+  interface ReactRedux.Property<TodoListProps> with
+    member val store = maybeStore
+    member val children = None
 
 
-let createActionButton (actionLabel, dispatcher) =
-  Tag.button [ Attr.Key actionLabel
-               Attr.OnClick dispatcher
-             ]
-    [ Tag.h1 [] [unbox actionLabel]]
 
-type TodoList(props) as this =
+type TodoList(props) =
   inherit React.Component<TodoListProps, TodosState>(props)
 
-  let labelFrom actionCreator =  actionCreator() |> toString
-
-  let dispatcherFrom actionCreator (_:React.MouseEvent) =
-    let act = actionCreator()
-    ReactRedux.dispatch props act
-
-  let makeTodo (t : Todo.T) =
-    TodoItem.make <|
-      TodoItem.TodoItemProps(
-        todo = t,
-        user = props.user,
-        maybeStore = props.store,
-        maybeChildren = None)
-
-  let buttons =
-    [ nothing; addTodo props.user ]
-    |> List.map (fun actionCreator -> (labelFrom actionCreator, dispatcherFrom actionCreator))
-    |> List.map createActionButton
-
   member self.render() =
+    let toString =
+      function
+        | ChangeUser _ -> "Swap User"
+        | Create _ -> "Creates"
+
+    let labelFrom actionCreator =  actionCreator() |> toString
+    let createActionButton (actionLabel, dispatcher) =
+      Tag.button [ Attr.Key actionLabel; Attr.OnClick dispatcher] [unbox actionLabel]
+
+    let dispatcherFrom actionCreator (_:React.MouseEvent) =
+      let act = actionCreator()
+      ReactRedux.dispatch props act
+
+    let makeTodo (t : Todo.T) =
+      TodoItem.make <|
+        TodoItem.TodoItemProps(
+          todo = t,
+          user = props.user,
+          maybeStore = (props :> ReactRedux.Property<TodoListProps>).store,
+          maybeChildren = None)
+
+    let buttons =
+      [ toggleUser props.user; addTodo props.user ]
+      |> List.map (fun actionCreator -> (labelFrom actionCreator, dispatcherFrom actionCreator))
+      |> List.map createActionButton
 
     let {List = a} =  props.state in
       Tag.div [] [
-        Tag.ul [] (List.map makeTodo a)
-        Tag.div [] buttons
         Tag.div [] [unbox <| sprintf "Logged in as User %O" props.user.Id]
+        Tag.div [] buttons
+        Tag.div [] (List.map makeTodo a)
       ]
 
-
-TodoList?props <- createObj [
-  "state" ==> React.PropTypes.object
-  "user" ==> React.PropTypes.object
-]
 
 let stateMapper =
   Func<TodosState, TodoListProps option, obj>(
     fun a b ->
       let res = createObj [
-          "state" ==> box a;
-          "user" ==> box b.Value.user]
+                  "state" ==> box a;
+                  "user" ==> (box <| User.make a.UserId)]
       res)
 
 
 let provider = ReactRedux.buildProvider TodoList stateMapper
+

@@ -30,7 +30,6 @@ var cfg = {
 };
 
 if (process.env.WEBPACK_DEV_SERVER) {
-  console.log("1111111111111111111111111111111");
   cfg.entry = [
     "webpack-dev-server/client?http://localhost:8080",
     'webpack/hot/only-dev-server',

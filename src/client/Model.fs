@@ -77,12 +77,12 @@ module Perm =
 // authorization have a permission type as their first constituent. This forces
 // us to check for permission at the time when we construct them.
 type TodoAction =
-  | Nothing
   | Create of Todo.T
   | ChangeText of Perm.ToEdit * string
   | MarkComplete of Perm.ToComplete
   | ToggleComplete of Perm.ToComplete
   | CheckAll of Perm.ToComplete list
+  | ChangeUser of UserId
 
 
 module Actions =
@@ -94,24 +94,24 @@ module Actions =
     List.map update list
 
   let rec perform state act =
+    printfn "Performing action %A" act
     match act with
-    | Create (todo) ->
-      printfn "Creating todo"
-      { state with List = todo :: state.List}
+      | Create (todo) ->
+        printfn "Creating todo"
+        { state with List = todo :: state.List}
 
-    | ChangeText (Perm.CanEdit_ todo, s) ->
-      let updated = { todo with Text = s }
-      { state with List = replaceItem todo updated state.List }
+      | ChangeText (Perm.CanEdit_ todo, s) ->
+        let updated = { todo with Text = s }
+        { state with List = replaceItem todo updated state.List }
 
-    | MarkComplete (Perm.CanComplete_ todo) ->
-      { state with List = replaceItem todo (Todo.setComplete true todo) state.List }
+      | MarkComplete (Perm.CanComplete_ todo) ->
+        { state with List = replaceItem todo (Todo.setComplete true todo) state.List }
 
-    | ToggleComplete (Perm.CanComplete_ todo) ->
-      { state with List = replaceItem todo (Todo.toggleComplete todo) state.List }
+      | ToggleComplete (Perm.CanComplete_ todo) ->
+        { state with List = replaceItem todo (Todo.toggleComplete todo) state.List }
 
-    | CheckAll todos ->
-      List.fold perform state (List.map MarkComplete todos)
+      | CheckAll todos ->
+        List.fold perform state (List.map MarkComplete todos)
 
-    | Nothing ->
-      printfn "Nothing happened"
-      state
+      | ChangeUser uid ->
+        { state with UserId = uid }

@@ -17,12 +17,13 @@ module RR = Fable.Import.ReactRedux
 module ReactRedux =
   type Globals() =
     member this.dispatchAction (props : Property<'T>) (action : Redux.Action<'A>) =
-      match (props :> Property<'T>).store with
+      match props.store with
         | None -> failwith "Cannot create action dispatcher without a Redux store"
         | Some store ->
           action
           |> Redux.toObj
           |> store.dispatch
+          // |> (fun x -> printfn "Store value dispatched to %A" (store.getState()))
           |> ignore
 
     member this.dispatch (props : Property<'T>) (payload : 'A) =
