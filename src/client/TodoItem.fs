@@ -14,17 +14,17 @@ open Model
 
 open Fable.Helpers
 
-type TodoItemProps(maybeStore, maybeChildren, todo, user) =
+type Props(maybeStore, maybeChildren, todo, user) =
 
   member val todo : Todo.T = todo
   member val user : User.T = user
 
-  interface ReactRedux.Property<TodoItemProps> with
+  interface ReactRedux.Property<Props> with
     member val store = maybeStore
     member val children = maybeChildren
 
 type TodoList(props) =
-  inherit React.Component<TodoItemProps, Todo.T>(props)
+  inherit React.Component<Props, Todo.T>(props)
 
   let todo = props.todo
 
@@ -43,7 +43,7 @@ type TodoList(props) =
     ]
 
 let stateMapper =
-  Func<Todo.T, TodoItemProps option, obj>(
+  Func<Todo.T, Props option, obj>(
     fun a b ->
       let res =
         createObj [
@@ -51,4 +51,4 @@ let stateMapper =
           "user" ==> box b.Value.user]
       res)
 
-let make (props : TodoItemProps) = ReactRedux.factory TodoList stateMapper props
+let make (props : Props) = ReactRedux.factory TodoList stateMapper props

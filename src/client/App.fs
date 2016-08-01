@@ -46,7 +46,7 @@ type TodoList(props) =
     let toString =
       function
         | ChangeUser _ -> "Swap User"
-        | Create _ -> "Creates"
+        | Create _ -> "Create"
 
     let labelFrom actionCreator =  actionCreator() |> toString
     let createActionButton (actionLabel, dispatcher) =
@@ -56,25 +56,26 @@ type TodoList(props) =
       let act = actionCreator()
       ReactRedux.dispatch props act
 
-    let makeTodo (t : Todo.T) =
-      TodoItem.make <|
-        TodoItem.TodoItemProps(
-          todo = t,
-          user = props.user,
-          maybeStore = (props :> ReactRedux.Property<TodoListProps>).store,
-          maybeChildren = None)
-
     let buttons =
       [ toggleUser props.user; addTodo props.user ]
       |> List.map (fun actionCreator -> (labelFrom actionCreator, dispatcherFrom actionCreator))
       |> List.map createActionButton
 
+    let makeTodo (t : Todo.T) =
+      TodoItem.make <|
+        TodoItem.Props(
+          todo = t,
+          user = props.user,
+          maybeStore = (props :> ReactRedux.Property<TodoListProps>).store,
+          maybeChildren = None)
+
     let {List = a} =  props.state in
-      Tag.div [] [
-        Tag.div [] [unbox <| sprintf "Logged in as User %O" props.user.Id]
-        Tag.div [] buttons
-        Tag.div [] (List.map makeTodo a)
+      Tag.div [] <| List.concat [
+        [props.user.Id |> sprintf "Logged in as User %O" |> unbox ]
+        buttons
+        (List.map makeTodo a)
       ]
+
 
 
 let stateMapper =
