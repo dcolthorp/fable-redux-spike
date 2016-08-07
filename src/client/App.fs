@@ -2,6 +2,7 @@ module App
 
 open System
 open Fable.Core
+open Fable.Core.JsInterop
 open Fable.Import
 
 module React = Fable.Import.React
@@ -61,7 +62,7 @@ type TodoList(props) =
       |> List.map (fun actionCreator -> (labelFrom actionCreator, dispatcherFrom actionCreator))
       |> List.map createActionButton
 
-    let makeTodo (t : Todo.T) =
+    let makeTodo (t : Todo) =
       TodoItem.make <|
         TodoItem.Props(
           todo = t,
@@ -71,7 +72,7 @@ type TodoList(props) =
 
     let {List = a} =  props.state in
       Tag.div [] <| List.concat [
-        [props.user.Id |> sprintf "Logged in as User %O" |> unbox ]
+        [props.user.Id.toString() |> sprintf "Logged in as User with id %O" |> unbox ]
         buttons
         (List.map makeTodo a)
       ]

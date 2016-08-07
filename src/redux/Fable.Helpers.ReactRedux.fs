@@ -32,7 +32,7 @@ module ReactRedux =
     member this.factory comp stateMapper =
       let com = RR.Globals.connect(stateMapper).Invoke(comp)
       fun props ->
-        React.createElement(Case1 com, props |> Serialize.toPlainJsObj)
+        React.createElement(Case1 com, props |> JsInterop.toPlainJsObj)
 
     member this.buildProvider comp (stateMapper : MapStateToProps<'S, 'P>) =
       let f = this.factory comp stateMapper

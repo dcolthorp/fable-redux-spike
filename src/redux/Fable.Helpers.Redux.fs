@@ -32,7 +32,7 @@ module Redux =
     member __.toObj ({ ``type`` = actionType; payload = p } : Action<'A>) =
       [ ("type", actionType :> obj); ("payload", p :> obj) ]
       |> List.toSeq
-      |> Fable.Core.Operators.createObj
+      |> Fable.Core.JsInterop.createObj
 
 [<AutoOpen>]
 module Redux_extensions =
