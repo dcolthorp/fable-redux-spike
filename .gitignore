@@ -8,3 +8,5 @@ tmp
 .*.swp
 bower_components
 public/bundle.*
+build
+src/obj/
